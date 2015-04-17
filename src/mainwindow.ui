@@ -7,24 +7,98 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>300</height>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>VPKViewer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>-1</x>
-      <y>0</y>
-      <width>501</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout"/>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QComboBox" name="configComboBox">
+        <property name="minimumSize">
+         <size>
+          <width>345</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editConfigsPushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Edit configs</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+      <item>
+       <widget class="QTreeWidget" name="folderTreeWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="fileListWidget">
+        <property name="minimumSize">
+         <size>
+          <width>310</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -42,10 +116,14 @@
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -53,7 +131,57 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QDockWidget" name="consoleDockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPlainTextEdit" name="consoleText">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>150</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
@@ -68,6 +196,11 @@
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>
