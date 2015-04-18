@@ -1,4 +1,9 @@
 #include "processor.h"
+#include <cassert>
+
+namespace {
+    const QString fileListRegex = "^([/a-z0-9]+) crc=0x\\d+ metadatasz=\\d+ fnumber=\\d+ ofs=0x\\d+ sz=(\\d+)";
+}
 
 Processor::Processor(ConfigManager *cfgManager, QObject *parent) :
 	QObject(parent),
@@ -10,8 +15,8 @@ QString Processor::exePath() const {
 	return mConfigManager->exePath();
 }
 
-QVector<Processor::FileInfo> Processor::getFiles(QString vpk) {
-	QVector<Processor::FileInfo> list;
+QList<Processor::FileInfo> Processor::getFiles(QString vpk) {
+    QList<Processor::FileInfo> list;
 	QString cmd = "L " + vpk;
 	QString output, error;
 	QProcess::ExitStatus status = runCommand(cmd, output, error);
@@ -20,9 +25,24 @@ QVector<Processor::FileInfo> Processor::getFiles(QString vpk) {
 	}
 
 	QStringList sList = output.split("\n");
-	for(QString s : sList) {
-		// TODO: Line parsing. Regex?
+    for(QString s : sList) {
+        QRegExp r(fileListRegex);
+        if(r.indexIn(s) == -1) {
+            continue;
+        }
+
+        QString sPath = r.cap(1);
+        QString sSize = r.cap(2);
+        bool ok;
+        int size = sSize.toInt(&ok);
+        assert(ok);
+
+        FileInfo info;
+        info.mPath = sPath;
+        info.mSize = size;
+        list.append(info);
 	}
+    return list;
 }
 
 QProcess::ExitStatus Processor::runCommand(QString cmd, QString &out, QString &err) {

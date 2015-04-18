@@ -21,7 +21,7 @@ class Processor : public QObject
 
 		/// \brief Get a list of files contained inside the given vpk.
 		/// \returns Empty QVector if error or no files found.
-		QVector<FileInfo> getFiles(QString vpk);
+        QList<FileInfo> getFiles(QString vpk);
 
 	signals:
 
