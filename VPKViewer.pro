@@ -17,13 +17,13 @@ SOURCES +=\
     src/mainwindow.cpp \
     src/configmanager.cpp \
     src/processor.cpp \
-    src/vpkobject.cpp
+    src/fileservice.cpp
 
 HEADERS  += \
     src/mainwindow.h \
     src/configmanager.h \
     src/processor.h \
-    src/vpkobject.h
+    src/fileservice.h
 
 FORMS    += \
     src/mainwindow.ui

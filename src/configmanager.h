@@ -10,6 +10,12 @@ class ConfigManager : public QObject
 	public:
 
 		struct Config {
+				Config() {}
+				Config(QString name, QString exePath) :
+					mName(name), mExePath(exePath)
+				{
+				}
+
 				QString mName;
 				QString mExePath;
 		};
@@ -23,8 +29,10 @@ class ConfigManager : public QObject
 
 		QList<QString> configNames() const;
 
-		void getConfig(QString name);
-		void selectConfig(QString name);
+		void addConfig(Config cfg);
+
+		Config getConfig(QString name, bool *ok = 0);
+		void selectConfig(QString name, bool *ok = 0);
 
 	signals:
 

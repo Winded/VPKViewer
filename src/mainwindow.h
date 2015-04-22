@@ -2,7 +2,11 @@
 #define MAINWINDOW_H
 
 #include "configmanager.h"
+#include "processor.h"
+#include "fileservice.h"
 #include <QMainWindow>
+#include <QTreeWidget>
+#include <QListWidget>
 
 namespace Ui {
 class MainWindow;
@@ -19,14 +23,26 @@ class MainWindow : public QMainWindow
     private slots:
         void openFileDialog();
 
-        void quit();
+		void consoleOutput(QString output);
+		void error(QString output);
+
+		void listItemDoubleClicked(QListWidgetItem *item);
 
 	private:
         void openVPK(QString path);
+		void refreshFolderList();
+		void refreshFileList();
 
 		Ui::MainWindow *ui;
 
         ConfigManager mConfigManager;
+		FileService *mFileService;
+		Processor *mProcessor;
+
+		QString mCurrentPath;
+
+		QMap<QString, QTreeWidgetItem*> mFolders;
+		QMap<QString, QListWidgetItem*> mListItems;
 };
 
 #endif // MAINWINDOW_H
