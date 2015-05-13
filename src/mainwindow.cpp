@@ -4,14 +4,19 @@
 #include <QMessageBox>
 #include <QProxyStyle>
 #include <QShortcut>
+#include <QMimeData>
 #include <cassert>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	mFileService(new FileService()),
-	mProcessor(new Processor(&mConfigManager, this))
+	mProcessor(new Processor(&mConfigManager, this)),
+	mCurrentFile(QString()),
+	mCurrentPath(QString())
 {
+	setAcceptDrops(true);
+
 	ui->setupUi(this);
 
     ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
@@ -26,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileDialog()));
 
+	ui->fileListWidget->setDragEnabled(true);
+	ui->fileListWidget->setAcceptDrops(true);
 	connect(ui->fileListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(listItemDoubleClicked(QListWidgetItem*)));
 
 	connect(mProcessor, SIGNAL(programOutput(QString)), this, SLOT(consoleOutput(QString)));
@@ -85,10 +92,33 @@ void MainWindow::listItemDoubleClicked(QListWidgetItem *item) {
 	refreshFileList();
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+	event->acceptProposedAction();
+}
+
+void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
+	event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+	const QMimeData *mData = event->mimeData();
+	if(!mData->hasUrls()) {
+		return;
+	}
+
+	QString fileName = mData->urls().last().toLocalFile();
+	if(QFileInfo(fileName).suffix() != "vpk") {
+		return;
+	}
+
+	openVPK(fileName);
+}
+
 void MainWindow::openVPK(QString path) {
 	QList<FileService::FileInfo> files = mProcessor->getFiles(path);
 	mFileService->setFiles(files);
 
+	mCurrentFile = path;
 	mCurrentPath = QString();
 	refreshFolderList();
 	refreshFileList();

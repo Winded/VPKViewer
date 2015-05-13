@@ -28,6 +28,10 @@ class MainWindow : public QMainWindow
 
 		void listItemDoubleClicked(QListWidgetItem *item);
 
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dragMoveEvent(QDragMoveEvent *event);
+		void dropEvent(QDropEvent *event);
+
 	private:
         void openVPK(QString path);
 		void refreshFolderList();
@@ -39,6 +43,7 @@ class MainWindow : public QMainWindow
 		FileService *mFileService;
 		Processor *mProcessor;
 
+		QString mCurrentFile;
 		QString mCurrentPath;
 
 		QMap<QString, QTreeWidgetItem*> mFolders;
