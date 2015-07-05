@@ -1,0 +1,23 @@
+html, body, .view-root {
+    width: 100%;
+    height: 100%;
+    background-color: #EEEEEE;
+      
+    display: flex;
+    flex-direction: row;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+#folder-menu {
+    background-color: #606060;
+    width: 30%;
+    flex-grow: 1;
+}
+
+#file-menu {
+    width: 70%;
+    flex-grow: 1;
+}

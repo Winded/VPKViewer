@@ -1,0 +1,27 @@
+{
+  "name": "vpkviewer",
+  "version": "1.0.0",
+  "description": "View and edit VPK files",
+  "main": "js/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Winded@github.com/Winded/VPKViewer.git"
+  },
+  "author": "Winded",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Winded/VPKViewer/issues"
+  },
+  "homepage": "https://github.com/Winded/VPKViewer#readme",
+  "devDependencies": {
+    "electron-prebuilt": "^0.29.1"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.5",
+    "jquery": "^2.1.4",
+    "ui-router": "0.0.1"
+  }
+}
