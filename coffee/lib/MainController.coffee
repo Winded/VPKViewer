@@ -1,7 +1,19 @@
+remote = require("remote")
+ConfigManager = remote.require("./lib/ConfigManager")
+
 module.exports =
 class MainController
     @$inject = ["$scope"]
 
     constructor: (@scope) ->
-        @scope.text1 = "Column 1"
-        @scope.text2 = "Column 2"
+        configManager = ConfigManager.getInstance()
+        @scope.configs = configManager.configs
+        @scope.selectedConfig = configManager.selectedConfig
+
+        @scope.configSelected = @configSelected
+
+    configSelected: () =>
+        configManager = ConfigManager.getInstance()
+        cfg = @scope.selectedConfig
+        configManager.selectConfig(cfg.id)
+        configManager.save()

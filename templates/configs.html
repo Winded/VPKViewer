@@ -1,7 +1,36 @@
 <div class="container">
 
     <h1>Configs</h1>
+    <form action="javascript:void(0);">
+        <div class="form-group">
+            <label>Select configuration</label>
+            <select class="form-control" ng-model="currentConfig" ng-options="config.name for config in configs">
+                <option value="">- Select configuration -</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" class="form-control" ng-disabled="!currentConfig" ng-model="currentConfig.name">
+        </div>
+        <div class="form-group">
+            <label>Executable path</label>
+            <input type="text" class="form-control" ng-disabled="!currentConfig" ng-model="currentConfig.exePath">
+        </div>
+        <a class="btn btn-default" ng-click="addConfig()">New config</a>
+        <a class="btn btn-danger" ng-click="removeConfig()" ng-disabled="!currentConfig">Delete config</a>
+    </form>
 
-    <a ui-sref="main">Back</a>
+</div>
 
+<div class="bottom-bar">
+    <div class="container">
+        <a class="btn btn-default" ng-click="save()">
+            <span class="glyphicon glyphicon-ok" />
+            Save
+        </a>
+        <a class="btn btn-default" ui-sref="main">
+            <span class="glyphicon glyphicon-remove" />
+            Cancel
+        </a>
+    </div>
 </div>

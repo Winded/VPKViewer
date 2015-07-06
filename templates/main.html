@@ -1,5 +1,22 @@
 
-<div id="folder-menu">{{ text1 }}</div>
-<div id="file-menu">
-	{{ text2 }}
+<div class="top-bar">
+    <form class="form-horizontal" action="javascript:void(0);">
+        <div class="form-group from-group-sm" style="margin-bottom: 5px; margin-left: 0; margin-right: 0;">
+            <div class="col-xs-5"></div>
+            <label class="col-xs-3 control-label" style="  text-align: right; padding-top: 7px;">Configuration:</label>
+            <div class="col-xs-4"  style="margin-right: 0;">
+                <select class="form-control" ng-model="selectedConfig" 
+                    ng-change="configSelected()" ng-options="config.name for config in configs" />
+            </div>
+        </div>
+    </form>
+</div>
+<div class="grid-container">
+
+    <div class="grid-item" id="folder-menu">
+    </div>
+
+    <div class="grid-item" id="file-menu">
+    </div>
+    
 </div>

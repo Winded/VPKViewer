@@ -29,6 +29,11 @@ class MenuBar
                         label: "Configs"
                         click: @openConfigsView
                     }
+                    {
+                        label: "Reload"
+                        accelerator: "Ctrl+R"
+                        click: () -> WindowManager.getInstance().mainWindow.reload()
+                    }
                 ]
             }
         ]
@@ -38,7 +43,7 @@ class MenuBar
         Menu.setApplicationMenu(@menu)
 
     openFile: () ->
-        console.log("NO")
+        # TODO
 
     openConfigsView: () ->
         windowManager = WindowManager.getInstance()
