@@ -17,6 +17,9 @@
     </div>
 
     <div class="grid-item" id="file-menu">
+        <ul ng-if="files.length > 0">
+            <li ng-repeat="file in files">{{ file.name }}</li>
+        </ul>
     </div>
     
 </div>

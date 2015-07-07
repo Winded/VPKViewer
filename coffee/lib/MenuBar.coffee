@@ -2,10 +2,11 @@ Dialog = require("dialog")
 Menu = require("menu")
 ipc = require("ipc")
 WindowManager = require("./WindowManager")
+VPKLoader = require("./VPKLoader")
 
 module.exports =
 class MenuBar
-    @instance = null
+    @instance: null
     @getInstance: () ->
         @instance = new MenuBar() if not @instance?
         return @instance
@@ -43,7 +44,19 @@ class MenuBar
         Menu.setApplicationMenu(@menu)
 
     openFile: () ->
-        # TODO
+        windowManager = WindowManager.getInstance()
+        vpkLoader = VPKLoader.getInstance()
+        fileArr = Dialog.showOpenDialog windowManager,
+            title: "Open VPK file"
+            filters: [
+                name: "VPK files", extensions: ["vpk"]
+            ]
+            properties: ["openFile"]
+        if fileArr? and fileArr.length >= 1
+            file = fileArr[0]
+            vpkLoader.load(file)
+            windowManager = WindowManager.getInstance()
+            windowManager.mainWindow.webContents.send("goto-view", state: "main")
 
     openConfigsView: () ->
         windowManager = WindowManager.getInstance()
