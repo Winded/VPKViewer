@@ -1,12 +1,14 @@
-# Load bootstrap
-global.jQuery = require("jquery")
-require("bootstrap")
+ConfigManager = require("./js/lib/ConfigManager")
+MenuBar = require("./js/lib/MenuBar")
 
-ipc = require("ipc")
-
+global.document = window.document
 angular = require("angular")
 
 app = angular.module "vpkviewer", [require("ui-router")]
+
+app.service "menuBar", require("./js/lib/MenuBar")
+
+app.directive "fileDialog", require("./js/lib/FileDialog")
 
 app.controller "MainController", require("./js/lib/MainController")
 app.controller "ConfigsController", require("./js/lib/ConfigsController")
@@ -22,6 +24,11 @@ app.config ($stateProvider, $urlRouterProvider) ->
         templateUrl: "templates/configs.html"
         controller: "ConfigsController"
 
-app.run ($state) ->
-    ipc.on "goto-view", (arg) ->
-        $state.go(arg.state, if arg.params? then arg.params else null)
+app.run ($state, menuBar) ->
+
+    menuBar.initialize()
+
+    configManager = ConfigManager.getInstance()
+    success = configManager.load()
+    if not success
+        $state.go("configs")

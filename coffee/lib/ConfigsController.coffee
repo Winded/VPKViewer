@@ -1,19 +1,21 @@
-remote = require("remote")
-ConfigManager = remote.require("./lib/ConfigManager")
+ConfigManager = require("./ConfigManager")
 
 module.exports =
 class ConfigsController
+    @instance = null
     @$inject = ["$scope", "$state"]
 
     constructor: (@scope, @state) ->
+        ConfigsController.instance = @
         @configManager = ConfigManager.getInstance()
+        # We don't want to edit the actual configs until we save them
         @scope.configs = JSON.parse(JSON.stringify(@configManager.configs))
         @scope.save = @save
         @scope.addConfig = @addConfig
         @scope.removeConfig = @removeConfig
 
     save: () =>
-        @configManager.configs = @scope.configs
+        @configManager.configs = JSON.parse(JSON.stringify(@scope.configs))
         @configManager.save()
         @state.go("main")
 

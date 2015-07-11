@@ -1,6 +1,5 @@
-remote = require("remote")
-ConfigManager = remote.require("./lib/ConfigManager")
-VPKLoader = remote.require("./lib/VPKLoader")
+ConfigManager = require("./ConfigManager")
+VPKLoader = require("./VPKLoader")
 
 module.exports =
 class MainController
@@ -13,7 +12,6 @@ class MainController
 
         @scope.path = ""
         @scope.files = @getFiles()
-        alert(@scope.files.length)
 
         @scope.configSelected = @configSelected
 

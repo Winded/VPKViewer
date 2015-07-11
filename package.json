@@ -2,7 +2,7 @@
   "name": "vpkviewer",
   "version": "1.0.0",
   "description": "View and edit VPK files",
-  "main": "js/main.js",
+  "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/Winded/VPKViewer#readme",
   "devDependencies": {
-    "electron-prebuilt": "^0.29.1"
+    "nw": "^0.12.2"
   },
   "dependencies": {
     "angular": "^1.4.1",

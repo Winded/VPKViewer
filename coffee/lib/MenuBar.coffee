@@ -1,49 +1,32 @@
-Dialog = require("dialog")
-Menu = require("menu")
-ipc = require("ipc")
-WindowManager = require("./WindowManager")
+gui = window.require("nw.gui")
 VPKLoader = require("./VPKLoader")
 
 module.exports =
 class MenuBar
-    @instance: null
-    @getInstance: () ->
-        @instance = new MenuBar() if not @instance?
-        return @instance
+    @$inject = ["$state"]
 
-    constructor: () ->
-        @menus = [
-            {
-                label: "File"
-                submenu: [
-                    {
-                        label: "Open"
-                        accelerator: "Ctrl+O"
-                        click: @openFile
-                    }
-                ]
-            }
-            {
-                label: "View"
-                submenu: [
-                    {
-                        label: "Configs"
-                        click: @openConfigsView
-                    }
-                    {
-                        label: "Reload"
-                        accelerator: "Ctrl+R"
-                        click: () -> WindowManager.getInstance().mainWindow.reload()
-                    }
-                ]
-            }
-        ]
+    constructor: (@state) ->
+        @menu = new gui.Menu(type: "menubar")
+
+        @fileMenu = new gui.Menu()
+        @fileMenu.append new gui.MenuItem
+            label: "Open"
+            key: "o"
+            modifiers: "ctrl"
+            click: @openFile
+
+        @viewMenu = new gui.Menu()
+        @viewMenu.append new gui.MenuItem
+            label: "Configs"
+            click: @openConfigsView
+
+        @menu.append new gui.MenuItem(label: "File", submenu: @fileMenu)
+        @menu.append new gui.MenuItem(label: "View", submenu: @viewMenu)
 
     initialize: () ->
-        @menu = Menu.buildFromTemplate(@menus)
-        Menu.setApplicationMenu(@menu)
+        gui.Window.get().menu = @menu
 
-    openFile: () ->
+    openFile: () =>
         windowManager = WindowManager.getInstance()
         vpkLoader = VPKLoader.getInstance()
         fileArr = Dialog.showOpenDialog windowManager,
@@ -58,6 +41,5 @@ class MenuBar
             windowManager = WindowManager.getInstance()
             windowManager.mainWindow.webContents.send("goto-view", state: "main")
 
-    openConfigsView: () ->
-        windowManager = WindowManager.getInstance()
-        windowManager.mainWindow.webContents.send("goto-view", state: "configs")
+    openConfigsView: () =>
+        @state.go("configs")

@@ -1,5 +1,4 @@
 ConfigManager = require("./ConfigManager")
-Dialog = require("dialog")
 ChildProcess = require("child_process")
 
 module.exports=
@@ -17,7 +16,7 @@ class VPKLoader
         configManager = ConfigManager.getInstance()
         config = configManager.selectedConfig
         if not config? or not config.exePath? or config.exePath == ""
-            Dialog.showErrorBox("No configuration", "Invalid configuration. Make sure you have a valid configuration.")
+            alert("Invalid configuration. Make sure you have a valid configuration.")
             return
         cmd = "\"#{config.exePath}\" L \"#{file}\""
         result = null
@@ -25,7 +24,7 @@ class VPKLoader
             result = ChildProcess.execSync(cmd)
             result = result.toString()
         catch err
-            Dialog.showErrorBox("Failed to execute vpk.exe", "Command #{cmd} failed to execute. Error output: #{err.stderr}")
+            alert("Command #{cmd} failed to execute. Error output: #{err.stderr}")
             return
 
         @list = []
