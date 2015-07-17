@@ -13,7 +13,6 @@ class MainController
 
         @scope.path = ""
         @scope.files = @getFiles()
-        alert(@scope.files.length)
 
         @scope.configSelected = @configSelected
 

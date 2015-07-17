@@ -2,7 +2,7 @@ ConfigManager = require("./ConfigManager")
 Dialog = require("dialog")
 ChildProcess = require("child_process")
 
-module.exports=
+module.exports =
 class VPKLoader
     @instance: null
     @getInstance: () ->
@@ -84,7 +84,7 @@ class VPKLoader
 
         return folders
 
-    filesInDir: (dir) ->
+    filesInDir: (dir) =>
         files = []
         for file in @list
             d = @getDir(file.path)
