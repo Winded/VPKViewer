@@ -1,42 +1,52 @@
-#ifndef VPKOBJECT_H
-#define VPKOBJECT_H
+#ifndef FILESERVICE_H
+#define FILESERVICE_H
 
 #include <QString>
 #include <QList>
+#include <QObject>
+#include <QHash>
+
+class FileObject : public QObject
+{
+        Q_OBJECT
+    public:
+        explicit FileObject(QString path, int size, bool isDirectory = false, QObject *parent = 0);
+        ~FileObject();
+
+        QString path() const;
+        QString name() const;
+
+        int size() const;
+
+        bool isDirectory() const;
+
+        FileObject *parent() const;
+        void setParent(FileObject *parent);
+
+        QList<FileObject *> children() const;
+
+    private:
+        QString mPath;
+        int mSize;
+        bool mIsDirectory;
+
+        FileObject *mParent;
+        QList<FileObject*> mChildren;
+};
 
 /// \brief Represents either a file or a folder inside a VPK package.
-class FileService
+class FileService : public QObject
 {
-	public:
-		struct FileInfo {
-				QString mPath;
-				int mSize;
-		};
+        Q_OBJECT
+    public:
+        explicit FileService(QList<FileObject*> *files, QObject *parent = 0);
+        ~FileService();
 
-		enum Type {
-			File,
-			Folder
-		};
-
-		FileService();
-
-		QList<FileInfo> allFiles() const;
-		QList<QString> allFolders() const;
-		QList<FileInfo> filesInDir(QString dir) const;
-		QList<QString> foldersInDir(QString dir) const;
-
-		bool isFile(QString path) const;
-
-		void setFiles(QList<FileInfo> files);
-
-		/// \brief Get directory of the given path
-		static QString getDir(QString path);
-		/// \brief Get the name of the file or directory from the given path
-		static QString getName(QString path);
+        FileObject *root() const;
 
 	private:
 
-		QList<FileInfo> mFiles;
+        FileObject *mRoot;
 };
 
-#endif // VPKOBJECT_H
+#endif // FILESERVICE_H

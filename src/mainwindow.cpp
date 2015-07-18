@@ -10,7 +10,7 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	mFileService(new FileService()),
+    mFileService(0),
 	mProcessor(new Processor(&mConfigManager, this)),
 	mCurrentFile(QString()),
 	mCurrentPath(QString())
@@ -24,28 +24,42 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->consoleDockWidget->setVisible(false);
 
+    mModel = new FileObjectModel();
+    mDirModel = new QSortFilterProxyModel();
+    mDirModel->setSourceModel(mModel);
+    mDirModel->setFilterKeyColumn(3);
+    mDirModel->setFilterFixedString("true");
+
+    ui->dirTree->setModel(mDirModel);
+    for(int i = 1; i < 4; i++) {
+        ui->dirTree->hideColumn(i);
+    }
+    ui->fileList->setModel(mModel);
+
 	//Default config
 	ConfigManager::Config defaultConfig("Test", "D:/Games/Steam/steamapps/common/Team Fortress 2/bin/vpk.exe");
 	mConfigManager.addConfig(defaultConfig);
 	mConfigManager.selectConfig(defaultConfig.mName);
 
-    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileDialog()));
+    connect(ui->fileList, SIGNAL(activated(QModelIndex)), this, SLOT(fileActivated(QModelIndex)));
 
-	ui->fileListWidget->setDragEnabled(true);
-	ui->fileListWidget->setAcceptDrops(true);
-	connect(ui->fileListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(listItemDoubleClicked(QListWidgetItem*)));
+    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileDialog()));
+    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+
+    ui->fileList->setDragEnabled(true);
+    ui->fileList->setAcceptDrops(true);
 
 	connect(mProcessor, SIGNAL(programOutput(QString)), this, SLOT(consoleOutput(QString)));
-	connect(mProcessor, SIGNAL(errorHappened(QString)), this, SLOT(error(QString)));
-
-	connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(mProcessor, SIGNAL(errorHappened(QString)), this, SLOT(error(QString)));
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete mDirModel;
+    delete mModel;
 	delete mFileService;
 	delete mProcessor;
+    delete ui;
 }
 
 void MainWindow::openFileDialog() {
@@ -75,23 +89,6 @@ void MainWindow::error(QString output) {
 	ui->consoleDockWidget->show();
 }
 
-void MainWindow::listItemDoubleClicked(QListWidgetItem *item) {
-	QString path = mListItems.key(item);
-	if(!path.isNull() && mFileService->isFile(path)) {
-		return;
-	}
-
-	if(path.isNull()) {
-		// This means we are dealing with the .. list item
-		mCurrentPath = FileService::getDir(mCurrentPath);
-	}
-	else {
-		mCurrentPath = path;
-	}
-
-	refreshFileList();
-}
-
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
 	event->acceptProposedAction();
 }
@@ -111,74 +108,35 @@ void MainWindow::dropEvent(QDropEvent *event) {
 		return;
 	}
 
-	openVPK(fileName);
+    openVPK(fileName);
+}
+
+void MainWindow::fileActivated(QModelIndex index) {
+    FileObject *obj = (FileObject*)index.internalPointer();
+    if(obj->isDirectory()) {
+        openDir(index);
+    }
 }
 
 void MainWindow::openVPK(QString path) {
-	QList<FileService::FileInfo> files = mProcessor->getFiles(path);
-	mFileService->setFiles(files);
+    QList<FileObject*> fileList;
+    mProcessor->getFiles(path, &fileList);
+
+    FileService *service = new FileService(&fileList);
+    mModel->setFileService(service);
+    if(mFileService) {
+        delete mFileService;
+    }
+    mFileService = service;
+
+    QModelIndex rIdx = mModel->index(0, 0, QModelIndex());
+    openDir(rIdx);
 
 	mCurrentFile = path;
-	mCurrentPath = QString();
-	refreshFolderList();
-	refreshFileList();
+    mCurrentPath = QString();
 }
 
-void MainWindow::refreshFolderList() {
-	ui->folderTreeWidget->clear();
-	ui->folderTreeWidget->setColumnCount(1);
-	mFolders.clear();
-
-	QProxyStyle s;
-	QTreeWidgetItem *root = new QTreeWidgetItem;
-	root->setText(0, "root");
-	root->setIcon(0, s.standardIcon(QStyle::SP_DirIcon));
-	ui->folderTreeWidget->addTopLevelItem(root);
-
-	for(QString folder : mFileService->allFolders()) {
-		QTreeWidgetItem *parent = root;
-		QString dir = FileService::getDir(folder);
-		if(!dir.isNull() && mFolders.value(dir)) {
-			parent = mFolders.value(dir);
-		}
-		QTreeWidgetItem *item = new QTreeWidgetItem;
-		item->setText(0, FileService::getName(folder));
-		item->setIcon(0, s.standardIcon(QStyle::SP_DirIcon));
-		parent->addChild(item);
-		mFolders.insert(folder, item);
-	}
-}
-
-void MainWindow::refreshFileList() {
-	ui->fileListWidget->clear();
-	mListItems.clear();
-	QProxyStyle s;
-
-	if(!mCurrentPath.isNull()) {
-		QListWidgetItem *item = new QListWidgetItem;
-		item->setText("..");
-		item->setIcon(s.standardIcon(QStyle::SP_DirIcon));
-		ui->fileListWidget->addItem(item);
-	}
-
-	QList<QString> folders = mFileService->foldersInDir(mCurrentPath);
-	QList<FileService::FileInfo> files = mFileService->filesInDir(mCurrentPath);
-
-	for(QString folder : folders) {
-		QString name = FileService::getName(folder);
-		QListWidgetItem *item = new QListWidgetItem;
-		item->setText(name);
-		item->setIcon(s.standardIcon(QStyle::SP_DirIcon));
-		ui->fileListWidget->addItem(item);
-		mListItems.insert(folder, item);
-	}
-
-	for(FileService::FileInfo info : files) {
-		QString name = FileService::getName(info.mPath);
-		QListWidgetItem *item = new QListWidgetItem;
-		item->setText(name);
-		item->setIcon(s.standardIcon(QStyle::SP_FileIcon));
-		ui->fileListWidget->addItem(item);
-		mListItems.insert(info.mPath, item);
-	}
+void MainWindow::openDir(QModelIndex &index) {
+    ui->dirTree->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+    ui->fileList->setRootIndex(index);
 }

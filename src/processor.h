@@ -17,9 +17,8 @@ class Processor : public QObject
 
 		QString exePath() const;
 
-		/// \brief Get a list of files contained inside the given vpk.
-		/// \returns Empty QList if error or no files found.
-		QList<FileService::FileInfo> getFiles(QString vpk);
+        /// \brief Fill the given list with files from the given vpk
+        void getFiles(QString vpk, QList<FileObject*> *outList);
 
 	signals:
 

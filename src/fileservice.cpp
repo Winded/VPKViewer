@@ -2,97 +2,91 @@
 #include <QStringList>
 #include <cassert>
 
-FileService::FileService()
+FileService::FileService(QList<FileObject *> *files, QObject *parent) :
+    QObject(parent)
+{
+    mRoot = new FileObject("root", 0, true);
+
+    QHash<QString, FileObject*> dirs;
+    for(FileObject *obj : *files) {
+        QStringList pSplit = obj->path().split("/");
+        if(pSplit.empty()) {
+            continue;
+        }
+        pSplit.removeLast();
+        QString sPath = "";
+        FileObject *parent = mRoot;
+        for(QString str : pSplit) {
+            sPath += sPath == "" ? str : "/" + str;
+            if(!dirs.contains(sPath)) {
+                FileObject *dObj = new FileObject(sPath, 0, true);
+                dObj->setParent(parent);
+                parent = dObj;
+                dirs[sPath] = dObj;
+            }
+            else {
+                parent = dirs[sPath];
+            }
+        }
+        obj->setParent(parent);
+    }
+}
+
+FileService::~FileService() {
+    delete mRoot;
+}
+
+FileObject *FileService::root() const {
+    return mRoot;
+}
+
+FileObject::FileObject(QString path, int size, bool isDirectory, QObject *parent) :
+    QObject(parent),
+    mPath(path),
+    mSize(size),
+    mIsDirectory(isDirectory),
+    mParent(0)
 {
 }
 
-QList<FileService::FileInfo> FileService::allFiles() const {
-	return mFiles;
+FileObject::~FileObject() {
+    for(FileObject *child : mChildren) {
+        delete child;
+    }
 }
 
-QList<QString> FileService::allFolders() const {
-	QList<QString> folders;
-
-	for(FileInfo info : mFiles) {
-		QStringList split = info.mPath.split("/");
-
-		QString s;
-		for(int i = 0; i < split.size() - 1; i++) {
-			s += i > 0 ? "/" + split[i] : split[i];
-			if(!folders.contains(s)) {
-				folders.append(s);
-			}
-		}
-	}
-
-	return folders;
+QString FileObject::path() const {
+    return mPath;
 }
 
-QList<FileService::FileInfo> FileService::filesInDir(QString dir) const {
-	QList<FileInfo> files;
-
-	for(FileInfo info : mFiles) {
-		QString d = FileService::getDir(info.mPath);
-		if(d == dir) {
-			files.append(info);
-		}
-	}
-
-	return files;
+QString FileObject::name() const {
+    QStringList split = mPath.split("/");
+    if(split.empty()) {
+        return QString();
+    }
+    return split.last();
 }
 
-QList<QString> FileService::foldersInDir(QString dir) const {
-	QList<QString> folders;
-
-	for(FileInfo info : mFiles) {
-		QStringList split = info.mPath.split("/");
-
-		QString s;
-		for(int i = 0; i < split.size() - 1; i++) {
-			QString curStr = split[i];
-			QString oldPath = s;
-			s += i > 0 ? "/" + curStr : curStr;
-
-			if(oldPath == dir && !folders.contains(s)) {
-				folders.append(s);
-			}
-		}
-	}
-
-	return folders;
+int FileObject::size() const {
+    return mSize;
 }
 
-bool FileService::isFile(QString path) const {
-	for(FileInfo info : mFiles) {
-		if(info.mPath == path) {
-			return true;
-		}
-	}
-	return false;
+bool FileObject::isDirectory() const {
+    return mIsDirectory;
 }
 
-void FileService::setFiles(QList<FileService::FileInfo> files) {
-	mFiles = files;
+FileObject *FileObject::parent() const {
+    return mParent;
 }
 
-QString FileService::getDir(QString path) {
-	QStringList split = path.split("/");
-	if(split.size() < 2) {
-		return QString();
-	}
-
-	QString s;
-	for(int i = 0; i < split.size() - 1; i++) {
-		s += i > 0 ? "/" + split[i] : split[i];
-	}
-	return s;
+void FileObject::setParent(FileObject *parent) {
+    if(mParent) {
+        mParent->mChildren.removeOne(this);
+    }
+    mParent = parent;
+    mParent->mChildren.append(this);
 }
 
-QString FileService::getName(QString path) {
-	QStringList split = path.split("/");
-	if(split.size() == 0) {
-		return QString();
-	}
-
-	return split[split.size() - 1];
+QList<FileObject *> FileObject::children() const {
+    return mChildren;
 }

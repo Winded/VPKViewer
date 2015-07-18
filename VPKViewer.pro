@@ -17,13 +17,15 @@ SOURCES +=\
     src/mainwindow.cpp \
     src/configmanager.cpp \
     src/processor.cpp \
-    src/fileservice.cpp
+    src/fileservice.cpp \
+    src/fileobjectmodel.cpp
 
 HEADERS  += \
     src/mainwindow.h \
     src/configmanager.h \
     src/processor.h \
-    src/fileservice.h
+    src/fileservice.h \
+    src/fileobjectmodel.h
 
 FORMS    += \
     src/mainwindow.ui

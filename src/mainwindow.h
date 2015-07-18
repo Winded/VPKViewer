@@ -4,9 +4,11 @@
 #include "configmanager.h"
 #include "processor.h"
 #include "fileservice.h"
+#include "fileobjectmodel.h"
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
+#include <QSortFilterProxyModel>
 
 namespace Ui {
 class MainWindow;
@@ -24,18 +26,18 @@ class MainWindow : public QMainWindow
         void openFileDialog();
 
 		void consoleOutput(QString output);
-		void error(QString output);
-
-		void listItemDoubleClicked(QListWidgetItem *item);
+        void error(QString output);
 
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dragMoveEvent(QDragMoveEvent *event);
 		void dropEvent(QDropEvent *event);
 
+        void fileActivated(QModelIndex index);
+
 	private:
         void openVPK(QString path);
-		void refreshFolderList();
-		void refreshFileList();
+
+        void openDir(QModelIndex &index);
 
 		Ui::MainWindow *ui;
 
@@ -43,11 +45,11 @@ class MainWindow : public QMainWindow
 		FileService *mFileService;
 		Processor *mProcessor;
 
-		QString mCurrentFile;
-		QString mCurrentPath;
+        QSortFilterProxyModel *mDirModel;
+        FileObjectModel *mModel;
 
-		QMap<QString, QTreeWidgetItem*> mFolders;
-		QMap<QString, QListWidgetItem*> mListItems;
+		QString mCurrentFile;
+        QString mCurrentPath;
 };
 
 #endif // MAINWINDOW_H
