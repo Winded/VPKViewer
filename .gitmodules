@@ -1,0 +1,3 @@
+[submodule "src/datawidgetbinder"]
+	path = src/datawidgetbinder
+	url = https://github.com/Winded/DataWidgetBinder.git

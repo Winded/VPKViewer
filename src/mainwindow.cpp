@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	mConfigManager.selectConfig(defaultConfig.mName);
 
     connect(ui->fileList, SIGNAL(activated(QModelIndex)), this, SLOT(fileActivated(QModelIndex)));
+	connect(ui->dirTree->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(folderSelected(QModelIndex)));
 
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileDialog()));
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
@@ -113,9 +114,14 @@ void MainWindow::dropEvent(QDropEvent *event) {
 
 void MainWindow::fileActivated(QModelIndex index) {
     FileObject *obj = (FileObject*)index.internalPointer();
-    if(obj->isDirectory()) {
-        openDir(index);
-    }
+	if(obj->isDirectory()) {
+		openDir(obj);
+	}
+}
+
+void MainWindow::folderSelected(QModelIndex index) {
+	FileObject *obj = (FileObject*)index.internalPointer();
+	openDir(obj);
 }
 
 void MainWindow::openVPK(QString path) {
@@ -130,13 +136,38 @@ void MainWindow::openVPK(QString path) {
     mFileService = service;
 
     QModelIndex rIdx = mModel->index(0, 0, QModelIndex());
-    openDir(rIdx);
+	FileObject *obj = (FileObject*)rIdx.internalPointer();
+	openDir(obj);
 
 	mCurrentFile = path;
     mCurrentPath = QString();
 }
 
-void MainWindow::openDir(QModelIndex &index) {
-    ui->dirTree->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
-    ui->fileList->setRootIndex(index);
+void MainWindow::openDir(FileObject *obj) {
+	QModelIndex idx = indexForObject(mDirModel, obj);
+	ui->dirTree->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::Select);
+	idx = indexForObject(mModel, obj);
+	ui->fileList->setRootIndex(idx);
+}
+
+QModelIndex MainWindow::indexForObject(QAbstractItemModel *model, FileObject *obj) {
+	return tryFindIndex(model, QModelIndex(), obj);
+}
+
+QModelIndex MainWindow::tryFindIndex(QAbstractItemModel *model, QModelIndex parent, FileObject *obj) {
+	for(int i = 0; i < model->rowCount(parent); i++) {
+		QModelIndex idx = model->index(i, 0, parent);
+		if(!idx.isValid()) {
+			continue;
+		}
+		FileObject *o = (FileObject*)idx.internalPointer();
+		if(obj == o) {
+			return idx;
+		}
+		idx = tryFindIndex(model, idx, obj);
+		if(idx.isValid()) {
+			return idx;
+		}
+	}
+	return QModelIndex();
 }

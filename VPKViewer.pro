@@ -18,14 +18,16 @@ SOURCES +=\
     src/configmanager.cpp \
     src/processor.cpp \
     src/fileservice.cpp \
-    src/fileobjectmodel.cpp
+    src/fileobjectmodel.cpp \
+    src/datawidgetbinder/datawidgetbinder.cpp
 
 HEADERS  += \
     src/mainwindow.h \
     src/configmanager.h \
     src/processor.h \
     src/fileservice.h \
-    src/fileobjectmodel.h
+    src/fileobjectmodel.h \
+    src/datawidgetbinder/datawidgetbinder.h
 
 FORMS    += \
     src/mainwindow.ui

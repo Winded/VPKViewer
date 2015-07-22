@@ -33,11 +33,15 @@ class MainWindow : public QMainWindow
 		void dropEvent(QDropEvent *event);
 
         void fileActivated(QModelIndex index);
+		void folderSelected(QModelIndex index);
 
 	private:
         void openVPK(QString path);
 
-        void openDir(QModelIndex &index);
+		void openDir(FileObject *obj);
+
+		QModelIndex indexForObject(QAbstractItemModel *model, FileObject *obj);
+		QModelIndex tryFindIndex(QAbstractItemModel *model, QModelIndex parent, FileObject *obj);
 
 		Ui::MainWindow *ui;
 

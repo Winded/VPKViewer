@@ -1,5 +1,7 @@
 #include "fileobjectmodel.h"
 
+#include <QProxyStyle>
+
 FileObjectModel::FileObjectModel(QObject *parent) :
     QAbstractItemModel(parent),
     mFileService(0),
@@ -72,11 +74,16 @@ QVariant FileObjectModel::data(const QModelIndex &index, int role) const {
         return QVariant();
     }
 
-    if(role != Qt::DisplayRole && role != Qt::EditRole) {
+	if(role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) {
         return QVariant();
     }
 
     FileObject *obj = (FileObject*)index.internalPointer();
+	if(role == Qt::DecorationRole) {
+		QProxyStyle s;
+		QIcon icon = obj->isDirectory() ? s.standardIcon(QStyle::SP_DirIcon) : s.standardIcon(QStyle::SP_FileIcon);
+		return QVariant::fromValue(icon);
+	}
     switch(index.column()) {
     case 0:
         return obj->name();
