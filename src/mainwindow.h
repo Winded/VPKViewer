@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "configmanager.h"
+#include "configservice.h"
 #include "processor.h"
 #include "fileservice.h"
 #include "fileobjectmodel.h"
@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
 		Q_OBJECT
 
 	public:
-		explicit MainWindow(QWidget *parent = 0);
+        explicit MainWindow(ConfigService *configService, QWidget *parent = 0);
 		~MainWindow();
 
     private slots:
@@ -27,6 +27,8 @@ class MainWindow : public QMainWindow
 
 		void consoleOutput(QString output);
         void error(QString output);
+
+        void goUp();
 
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dragMoveEvent(QDragMoveEvent *event);
@@ -38,14 +40,11 @@ class MainWindow : public QMainWindow
 	private:
         void openVPK(QString path);
 
-		void openDir(FileObject *obj);
-
-		QModelIndex indexForObject(QAbstractItemModel *model, FileObject *obj);
-		QModelIndex tryFindIndex(QAbstractItemModel *model, QModelIndex parent, FileObject *obj);
+        void openDir(QModelIndex index);
 
 		Ui::MainWindow *ui;
 
-        ConfigManager mConfigManager;
+        ConfigService *mConfigService;
 		FileService *mFileService;
 		Processor *mProcessor;
 

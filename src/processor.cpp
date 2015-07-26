@@ -5,14 +5,10 @@ namespace {
 	const QString fileListRegex = "^([/\\._a-z0-9]+) crc=0x\\d+ metadatasz=\\d+ fnumber=\\d+ ofs=0x\\d+ sz=(\\d+)";
 }
 
-Processor::Processor(ConfigManager *cfgManager, QObject *parent) :
+Processor::Processor(ConfigService *cfgService, QObject *parent) :
 	QObject(parent),
-	mConfigManager(cfgManager)
+    mConfigService(cfgService)
 {
-}
-
-QString Processor::exePath() const {
-	return mConfigManager->exePath();
 }
 
 void Processor::getFiles(QString vpk, QList<FileObject *> *outList) {
@@ -42,7 +38,9 @@ void Processor::getFiles(QString vpk, QList<FileObject *> *outList) {
 }
 
 QProcess::ExitStatus Processor::runCommand(QString cmd, QString &out, QString &err) {
-	QString fullCmd = "\"" + exePath() + "\"" + " " + cmd;
+    ConfigObject *cfg = mConfigService->selectedConfig();
+    assert(cfg);
+    QString fullCmd = "\"" + cfg->exePath() + "\"" + " " + cmd;
 
 	QProcess p(this);
 	p.start(fullCmd, QProcess::ReadWrite);

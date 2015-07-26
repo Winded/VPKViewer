@@ -7,11 +7,12 @@
 #include <QMimeData>
 #include <cassert>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(ConfigService *configService, QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
+    mConfigService(configService),
     mFileService(0),
-	mProcessor(new Processor(&mConfigManager, this)),
+    mProcessor(new Processor(configService, this)),
 	mCurrentFile(QString()),
 	mCurrentPath(QString())
 {
@@ -23,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->actionQuit->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
 
 	ui->consoleDockWidget->setVisible(false);
+
+    QProxyStyle s;
+    ui->upButton->setIcon(s.standardIcon(QStyle::SP_ArrowUp));
 
     mModel = new FileObjectModel();
     mDirModel = new QSortFilterProxyModel();
@@ -36,10 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->fileList->setModel(mModel);
 
-	//Default config
-	ConfigManager::Config defaultConfig("Test", "D:/Games/Steam/steamapps/common/Team Fortress 2/bin/vpk.exe");
-	mConfigManager.addConfig(defaultConfig);
-	mConfigManager.selectConfig(defaultConfig.mName);
+    connect(ui->upButton, SIGNAL(pressed()), this, SLOT(goUp()));
 
     connect(ui->fileList, SIGNAL(activated(QModelIndex)), this, SLOT(fileActivated(QModelIndex)));
 	connect(ui->dirTree->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(folderSelected(QModelIndex)));
@@ -64,7 +65,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::openFileDialog() {
-    if(mConfigManager.exePath().isEmpty()) {
+    if(!mConfigService->selectedConfig()) {
         QMessageBox::critical(this, "No vpk.exe path set", "Invalid configuration; no vpk.exe path present. "
                               "please make sure you have created a valid configuration.");
         return;
@@ -87,7 +88,19 @@ void MainWindow::error(QString output) {
 	p.setColor(QPalette::Text, Qt::red);
 	ui->consoleText->setPalette(p);
 	ui->consoleText->appendPlainText(output);
-	ui->consoleDockWidget->show();
+    ui->consoleDockWidget->show();
+}
+
+void MainWindow::goUp() {
+    if(!mFileService) {
+        return;
+    }
+
+    QModelIndex curIdx = ui->fileList->rootIndex();
+    QModelIndex idx = curIdx.parent();
+    if(idx.isValid()) {
+        openDir(idx);
+    }
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
@@ -115,13 +128,13 @@ void MainWindow::dropEvent(QDropEvent *event) {
 void MainWindow::fileActivated(QModelIndex index) {
     FileObject *obj = (FileObject*)index.internalPointer();
 	if(obj->isDirectory()) {
-		openDir(obj);
+        openDir(index);
 	}
 }
 
 void MainWindow::folderSelected(QModelIndex index) {
-	FileObject *obj = (FileObject*)index.internalPointer();
-	openDir(obj);
+    QModelIndex idx = mDirModel->mapToSource(index);
+    openDir(idx);
 }
 
 void MainWindow::openVPK(QString path) {
@@ -136,38 +149,14 @@ void MainWindow::openVPK(QString path) {
     mFileService = service;
 
     QModelIndex rIdx = mModel->index(0, 0, QModelIndex());
-	FileObject *obj = (FileObject*)rIdx.internalPointer();
-	openDir(obj);
+    openDir(rIdx);
 
 	mCurrentFile = path;
     mCurrentPath = QString();
 }
 
-void MainWindow::openDir(FileObject *obj) {
-	QModelIndex idx = indexForObject(mDirModel, obj);
-	ui->dirTree->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::Select);
-	idx = indexForObject(mModel, obj);
-	ui->fileList->setRootIndex(idx);
-}
-
-QModelIndex MainWindow::indexForObject(QAbstractItemModel *model, FileObject *obj) {
-	return tryFindIndex(model, QModelIndex(), obj);
-}
-
-QModelIndex MainWindow::tryFindIndex(QAbstractItemModel *model, QModelIndex parent, FileObject *obj) {
-	for(int i = 0; i < model->rowCount(parent); i++) {
-		QModelIndex idx = model->index(i, 0, parent);
-		if(!idx.isValid()) {
-			continue;
-		}
-		FileObject *o = (FileObject*)idx.internalPointer();
-		if(obj == o) {
-			return idx;
-		}
-		idx = tryFindIndex(model, idx, obj);
-		if(idx.isValid()) {
-			return idx;
-		}
-	}
-	return QModelIndex();
+void MainWindow::openDir(QModelIndex index) {
+    QModelIndex dirIdx = mDirModel->mapFromSource(index);
+    ui->dirTree->selectionModel()->setCurrentIndex(dirIdx, QItemSelectionModel::ClearAndSelect);
+    ui->fileList->setRootIndex(index);
 }

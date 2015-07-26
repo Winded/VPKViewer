@@ -6,11 +6,10 @@
 #include <QObject>
 #include <QHash>
 
-class FileObject : public QObject
+class FileObject
 {
-        Q_OBJECT
     public:
-        explicit FileObject(QString path, int size, bool isDirectory = false, QObject *parent = 0);
+        FileObject(QString path, int size, bool isDirectory = false);
         ~FileObject();
 
         QString path() const;

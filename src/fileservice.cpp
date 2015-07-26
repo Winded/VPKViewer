@@ -40,8 +40,7 @@ FileObject *FileService::root() const {
     return mRoot;
 }
 
-FileObject::FileObject(QString path, int size, bool isDirectory, QObject *parent) :
-    QObject(parent),
+FileObject::FileObject(QString path, int size, bool isDirectory) :
     mPath(path),
     mSize(size),
     mIsDirectory(isDirectory),
