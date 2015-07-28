@@ -5,6 +5,7 @@
 #include "processor.h"
 #include "fileservice.h"
 #include "fileobjectmodel.h"
+#include "objectpropertybinder/objectpropertybinder.h"
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
@@ -25,6 +26,9 @@ class MainWindow : public QMainWindow
     private slots:
         void openFileDialog();
 
+		void openConfigDialog();
+		void selectedConfigChanged(int index);
+
 		void consoleOutput(QString output);
         void error(QString output);
 
@@ -33,6 +37,8 @@ class MainWindow : public QMainWindow
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dragMoveEvent(QDragMoveEvent *event);
 		void dropEvent(QDropEvent *event);
+
+		void closeEvent(QCloseEvent *event);
 
         void fileActivated(QModelIndex index);
 		void folderSelected(QModelIndex index);
@@ -49,7 +55,7 @@ class MainWindow : public QMainWindow
 		Processor *mProcessor;
 
         QSortFilterProxyModel *mDirModel;
-        FileObjectModel *mModel;
+		FileObjectModel *mModel;
 
 		QString mCurrentFile;
         QString mCurrentPath;

@@ -96,8 +96,13 @@ void ConfigService::load() {
 }
 
 void ConfigService::save() {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/VPKViewer/config.json";
-    QFile file(path);
+	QString sDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/VPKViewer";
+	QString path = sDir + "/config.json";
+	QDir dir(sDir);
+	if(!dir.exists()) {
+		dir.mkpath(sDir);
+	}
+	QFile file(path);
     if(!file.open(QFile::WriteOnly)) {
         return;
     }

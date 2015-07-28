@@ -6,6 +6,7 @@
 #include <QShortcut>
 #include <QMimeData>
 #include <cassert>
+#include "configdialog.h"
 
 MainWindow::MainWindow(ConfigService *configService, QWidget *parent) :
 	QMainWindow(parent),
@@ -42,6 +43,13 @@ MainWindow::MainWindow(ConfigService *configService, QWidget *parent) :
 
     connect(ui->upButton, SIGNAL(pressed()), this, SLOT(goUp()));
 
+	for(ConfigObject *obj : mConfigService->configs()) {
+		ui->configComboBox->addItem(obj->name());
+	}
+	ui->configComboBox->setCurrentIndex(mConfigService->selectedIndex());
+	connect(ui->editConfigsPushButton, SIGNAL(pressed()), this, SLOT(openConfigDialog()));
+	connect(ui->configComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectedConfigChanged(int)));
+
     connect(ui->fileList, SIGNAL(activated(QModelIndex)), this, SLOT(fileActivated(QModelIndex)));
 	connect(ui->dirTree->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(folderSelected(QModelIndex)));
 
@@ -77,6 +85,20 @@ void MainWindow::openFileDialog() {
     }
 
 	openVPK(filePath);
+}
+
+void MainWindow::openConfigDialog() {
+	ConfigDialog dialog(mConfigService, this);
+	dialog.exec();
+	ui->configComboBox->clear();
+	for(ConfigObject *obj : mConfigService->configs()) {
+		ui->configComboBox->addItem(obj->name());
+	}
+	ui->configComboBox->setCurrentIndex(mConfigService->selectedIndex());
+}
+
+void MainWindow::selectedConfigChanged(int index) {
+	mConfigService->setSelectedIndex(index);
 }
 
 void MainWindow::consoleOutput(QString output) {
@@ -122,7 +144,11 @@ void MainWindow::dropEvent(QDropEvent *event) {
 		return;
 	}
 
-    openVPK(fileName);
+	openVPK(fileName);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+	mConfigService->save();
 }
 
 void MainWindow::fileActivated(QModelIndex index) {
